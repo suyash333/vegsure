@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.suyash333.vegsure"
+      "bundleIdentifier": "com.developerzone.vegsure"
     },
     "android": {
-      "package": "com.suyash333.vegsure",
+      "package": "com.developerzone.vegsure",
       "adaptiveIcon": {
         "backgroundColor": "#1f7a4d",
         "foregroundImage": "./assets/android-icon-foreground.png",

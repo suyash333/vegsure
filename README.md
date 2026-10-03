@@ -98,7 +98,7 @@ user to allow installs from their browser the first time. For wider reach,
 publish to Google Play instead: `npx eas-cli@latest submit --platform android`.
 
 Before publishing to Google Play, check the app id in `mobile/app.json`
-(`com.suyash333.vegsure`). It can't be changed after the first Play Store release.
+(`com.developerzone.vegsure`). It can't be changed after the first Play Store release.
 
 ### Device requirements
 
