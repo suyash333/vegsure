@@ -1,0 +1,26 @@
+{
+  "name": "vegscan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scan a food barcode, QR code or ingredient list and see which ingredients are not vegetarian or vegan",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --serve",
+    "build:preview": "node scripts/build-preview.mjs",
+    "test": "tsc -p tsconfig.test.json && node --test \"build-test/test/*.test.js\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "barcode-detector": "^3.2.2",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  }
+}
