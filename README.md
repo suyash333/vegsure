@@ -85,12 +85,28 @@ ML Kit is native code, so the app can't run in the Expo Go app. Use one of these
   the app and gives you a link to the `.apk`. Install it on your phone to test.
 - **Build on your computer:** with Android Studio installed and a phone connected
   by USB (developer mode on), run `npm run android`.
-- **Open in Android Studio:** run `npx expo prebuild --platform android` in
-  `mobile/`, then open the generated `mobile/android` folder in Android Studio.
-  For a debug build, keep `npx expo start` running so the app can load its
-  JavaScript. `android/` is generated from `app.json`, so don't edit it by hand;
-  delete it and run prebuild again after changing `app.json` or adding a native
-  package.
+- **Open in Android Studio:** run `npm install` in `mobile/`, then open the
+  **`mobile/android`** folder in Android Studio and wait for Gradle sync. For a
+  debug build, keep `npx expo start` running in `mobile/` so the app can load
+  its JavaScript.
+
+### The `android/` folder is committed
+
+`mobile/android` is a normal Android Studio project (generated once by
+`npx expo prebuild` and then committed), so you can open and edit it directly.
+Two things follow from that:
+
+- Changes to the app name, icons, permissions or app id in `mobile/app.json` no
+  longer reach Android on their own. Either make them in `android/` as well, or
+  regenerate the folder with `npx expo prebuild --platform android --clean`
+  (this overwrites hand edits in `android/`, so commit first and review the diff).
+- After adding a package with native code, run `npm install` and sync Gradle
+  again; autolinking picks it up without a prebuild.
+- Release builds made in Android Studio are signed with the shared debug key
+  (`android/app/debug.keystore`), which is fine for testing but not for Google
+  Play. For Play, create your own upload key in Android Studio (Build → Generate
+  Signed App Bundle) and keep it out of git, or let EAS manage signing with
+  `npx eas-cli@latest build --platform android --profile production`.
 - **Develop with live reload:** `npx eas-cli@latest build --profile development
   --platform android` once, install that APK, then `npm start` and open the
   project from the app.
