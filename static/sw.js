@@ -3,7 +3,7 @@
 // cached after first use, so photo checking works offline afterwards. Product
 // lookups are never cached here — they always need the network.
 const VERSION = "__BUILD_VERSION__";
-const CACHE = `vegscan-${VERSION}`;
+const CACHE = `vegsure-${VERSION}`;
 const SHELL = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -13,7 +13,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("vegscan-") && k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("vegsure-") && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -25,6 +25,8 @@ self.addEventListener("fetch", (event) => {
   const sameOrigin = url.origin === self.location.origin;
   const engine = url.hostname === "cdn.jsdelivr.net";
   if (!sameOrigin && !engine) return;
+  // The Android app download is large and changes with each release: never cache it.
+  if (url.pathname.endsWith(".apk")) return;
 
   event.respondWith(
     caches.open(CACHE).then(async (cache) => {

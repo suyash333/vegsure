@@ -40,7 +40,7 @@ if (serve) {
   });
   await ctx.watch();
   const { port } = await ctx.serve({ servedir: out, port: 8000 });
-  console.log(`VegScan running at http://localhost:${port}`);
+  console.log(`VegSure running at http://localhost:${port}`);
 } else {
   await esbuild.build(options);
   await copyStatic();

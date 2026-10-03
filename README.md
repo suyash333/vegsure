@@ -1,8 +1,16 @@
-# VegScan
+# VegSure
 
 A Yuka-style scanner for vegetarians and vegans. Scan a food pack's barcode or QR
-code, or photograph its ingredient list, and VegScan shows which ingredients don't
+code, or photograph its ingredient list, and VegSure shows which ingredients don't
 fit your diet, and why.
+
+It comes in two forms that share one ingredient checker (`src/core`):
+
+- **Android/iOS app** (`mobile/`), built with Expo. Barcodes, QR codes and
+  ingredient photos are read on the phone with **Google ML Kit**, offline.
+- **Website** (repo root), a PWA hosted on Hostinger or any web host. It reads
+  photos with Tesseract in the browser, and offers the Android app to Android
+  visitors once you upload it.
 
 ## What it does
 
@@ -11,8 +19,11 @@ fit your diet, and why.
   [Open Food Facts](https://world.openfoodfacts.org), a free, open database of
   over 3 million foods with a large Indian catalogue. You can also type the number.
 - **Photograph the ingredient list** when a product isn't in the database. The
-  text is read on the phone (Tesseract, nothing is uploaded), then shown to you to
-  correct before it's checked, because text recognition makes mistakes.
+  text is read on the phone (ML Kit in the app, Tesseract on the website; nothing
+  is uploaded), then shown to you to correct before it's checked, because text
+  recognition makes mistakes. The app reads English and Hindi/Marathi
+  (Devanagari) labels, and picks out the "Ingredients" block so the nutrition
+  table and address are left out.
 - **Type or paste** any ingredient list.
 - **Four diets**: Vegetarian (no eggs, the usual meaning in India), Vegetarian
   (eats eggs), Vegan, and Jain (no eggs, honey, onion, garlic or root vegetables).
@@ -29,19 +40,77 @@ fit your diet, and why.
 - **Recent scans** on the device, re-checked when you change diet. Installable as
   an app (PWA) and works offline apart from product lookups.
 
-## Running it
+## The website
 
 ```bash
 npm install
 npm run dev        # http://localhost:8000 (rebuilds on change)
-npm test           # 41 tests, offline
+npm test           # 41 tests of the shared checker, offline
 npm run build      # static site in dist/
 ```
 
-`dist/` is a plain static site with no server and no API keys, so you can host it on any
-static host (Netlify, Vercel, GitHub Pages, Cloudflare Pages, Hostinger). **The camera
-only works over HTTPS** (or on `localhost`). To try it on a phone during development,
-use an HTTPS tunnel such as `npx localtunnel --port 8000` or `cloudflared`.
+`dist/` is plain files with no server and no API keys. **The camera only works over
+HTTPS** (or on `localhost`). To try it on a phone during development, use an HTTPS
+tunnel such as `npx localtunnel --port 8000`.
+
+### Deploying to Hostinger
+
+Any Hostinger plan with a website works; Node.js hosting isn't needed.
+
+1. **SSL:** in hPanel → Security → SSL, install the free certificate and turn on
+   Force HTTPS.
+2. **Upload automatically (recommended):** in GitHub → Settings → Secrets and
+   variables → Actions, add `FTP_SERVER`, `FTP_USERNAME` and `FTP_PASSWORD` (from
+   hPanel → Files → FTP Accounts). Every push to `main` then builds the site and
+   uploads it to `public_html/` (`.github/workflows/deploy.yml`). Set the `FTP_DIR`
+   variable if your site lives somewhere else.
+3. **Or upload by hand:** `npm run build`, then upload everything *inside* `dist/`
+   (including the hidden `.htaccess`) to `public_html/` in hPanel's File Manager.
+
+`.htaccess` forces HTTPS, sets the right file types for the app manifest and the
+APK, and stops browsers caching the page and the offline worker.
+
+## The Android/iOS app
+
+```bash
+cd mobile
+npm install
+npm run typecheck
+```
+
+ML Kit is native code, so the app can't run in the Expo Go app. Use one of these:
+
+- **Build an APK in the cloud (no Android Studio needed):** create a free account
+  at expo.dev, then `npx eas-cli@latest login` and `npm run build:apk`. EAS builds
+  the app and gives you a link to the `.apk`. Install it on your phone to test.
+- **Build on your computer:** with Android Studio installed and a phone connected
+  by USB (developer mode on), run `npm run android`.
+- **Develop with live reload:** `npx eas-cli@latest build --profile development
+  --platform android` once, install that APK, then `npm start` and open the
+  project from the app.
+
+### Offering the APK from your website
+
+Rename the APK from EAS to **`vegsure.apk`** and upload it to `public_html/`, next
+to `index.html`. The website then shows Android visitors a "Get the VegSure
+Android app" card; until the file exists, the card stays hidden. Phones ask the
+user to allow installs from their browser the first time. For wider reach,
+publish to Google Play instead: `npx eas-cli@latest submit --platform android`.
+
+Before publishing to Google Play, check the app id in `mobile/app.json`
+(`com.suyash333.vegsure`). It can't be changed after the first Play Store release.
+
+### Device requirements
+
+- ML Kit runs on the phone's ordinary processor; no AI chip needed.
+- Android: the version Expo SDK 57 supports. iOS: recent ML Kit needs roughly
+  iOS 15.5 or newer.
+- No Google Play services needed: the reading models are built into the app.
+  This adds a few MB per script (the app includes Latin, Devanagari, Chinese,
+  Japanese and Korean, as the ML Kit library bundles all five).
+- An autofocus camera makes a real difference for small print.
+- iOS: test on a real iPhone. ML Kit doesn't run in the simulator on Apple-silicon
+  Macs.
 
 ## How the checking works
 
@@ -54,7 +123,9 @@ src/core/
   analyze.ts        matches rules per ingredient → findings + verdict
   gs1.ts            barcode / QR → GTIN (check digits, UPC-E, Digital Link)
   openfoodfacts.ts  product lookup
-src/web/            the phone UI: camera scanner, OCR, results, history
+src/web/            the website: camera scanner, Tesseract OCR, results, history
+mobile/src/app/     the app's screens (Expo Router)
+mobile/src/lib/     ML Kit OCR, storage, and the import of src/core
 ```
 
 - Each ingredient is checked separately, so "coconut milk, milk solids" flags only
@@ -74,12 +145,15 @@ src/web/            the phone UI: camera scanner, OCR, results, history
   or animal-derived clarifying agents never appear on labels.
 - The word list is English plus common Indian terms. Other languages rely on Open
   Food Facts' tags.
+- ML Kit reads Latin and Devanagari script. Tamil, Telugu, Gujarati, Bengali or
+  Kannada-only labels need the list typed in.
 - Jain practice varies. Dried ginger and turmeric, and tapioca/sabudana, are
   marked *check* rather than *avoid*.
 
 ## Next steps worth considering
 
-- A native app (React Native / Expo) for faster scanning and app-store distribution.
-  The `src/core` code is plain TypeScript and can be reused as-is.
-- Hindi and other Indian-language ingredient terms, plus OCR in those scripts.
+- A small server for the steps on-device reading can't do: EasyOCR for Tamil,
+  Telugu, Kannada and Bengali labels, LLM checks of unknown ingredient words
+  (text only), and caching answers by barcode.
+- Hindi and other Indian-language ingredient terms in the word list.
 - Letting users report a wrong verdict, and contributing photos back to Open Food Facts.

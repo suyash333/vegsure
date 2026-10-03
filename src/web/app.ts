@@ -104,6 +104,7 @@ dietButton.addEventListener("click", () => openDietPicker());
 
 function renderHome(): void {
   if (__PREVIEW__) return renderPreviewHome();
+  root.append(androidAppCard());
   const photoInput = fileInput((file) => show(() => renderOcr(file)));
   const barcodeForm = h(
     "form",
@@ -557,12 +558,37 @@ function highlightedList(text: string, a: Analysis): HTMLElement {
   return p;
 }
 
+const APK = "vegsure.apk";
+let apkAvailable: Promise<boolean> | null = null;
+
+/**
+ * On Android, offer the native app (better scanning, works offline) once an APK
+ * has been uploaded next to the site. Hidden until a HEAD request finds it, so
+ * the site works the same before the first app release.
+ */
+function androidAppCard(): HTMLElement {
+  const card = h(
+    "a",
+    { class: "app-card", href: APK, hidden: true },
+    h("strong", {}, "Get the VegSure Android app"),
+    h("small", {}, "Faster scanning, and reads ingredient photos offline."),
+  );
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const installed = matchMedia("(display-mode: standalone)").matches;
+  if (!isAndroid || installed) return card;
+  apkAvailable ??= fetch(APK, { method: "HEAD", cache: "no-store" })
+    .then((r) => r.ok && !/text\/html/i.test(r.headers.get("content-type") ?? ""))
+    .catch(() => false);
+  void apkAvailable.then((ok) => (card.hidden = !ok));
+  return card;
+}
+
 function renderPreviewHome(): void {
   root.append(
     h(
       "p",
       { class: "notice" },
-      "This is a preview of VegScan's ingredient checker. Barcode, QR and photo scanning need the camera and the Open Food Facts database, which this preview can't reach. They work in the app itself.",
+      "This is a preview of VegSure's ingredient checker. Barcode, QR and photo scanning need the camera and the Open Food Facts database, which this preview can't reach. They work in the app itself.",
     ),
     h(
       "section",

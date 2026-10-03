@@ -1,6 +1,6 @@
 {
-  "name": "VegScan — vegetarian & vegan ingredient checker",
-  "short_name": "VegScan",
+  "name": "VegSure — vegetarian & vegan ingredient checker",
+  "short_name": "VegSure",
   "description": "Scan a food barcode, QR code or ingredient list and see which ingredients aren't vegetarian or vegan.",
   "start_url": "./",
   "scope": "./",

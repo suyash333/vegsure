@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "VegSure",
+    "slug": "vegsure",
+    "scheme": "vegsure",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1f7a4d"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.suyash333.vegsure"
+    },
+    "android": {
+      "package": "com.suyash333.vegsure",
+      "adaptiveIcon": {
+        "backgroundColor": "#1f7a4d",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "VegSure uses the camera to scan barcodes and QR codes on food packs.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "VegSure uses the camera to photograph ingredient lists.",
+          "photosPermission": "VegSure reads ingredient lists from photos you choose."
+        }
+      ]
+    ]
+  }
+}

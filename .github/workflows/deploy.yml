@@ -1,0 +1,56 @@
+# Builds the website and uploads it to Hostinger over FTP on every push to main.
+#
+# One-time setup, in GitHub: Settings → Secrets and variables → Actions → New secret
+#   FTP_SERVER     e.g. ftp.yourdomain.com (hPanel → Files → FTP Accounts)
+#   FTP_USERNAME
+#   FTP_PASSWORD
+# Optional variable (same page, Variables tab):
+#   FTP_DIR        folder on the server, default "/public_html/" — must end with "/"
+#
+# The Android app (vegsure.apk) is uploaded separately; this never deletes it.
+name: Deploy website to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check FTP settings
+        id: ftp
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "FTP secrets are not set yet; skipping deploy. See the comment at the top of deploy.yml."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.ftp.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ftp.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.ftp.outputs.ready == 'true'
+        run: npm ci && npm test && npm run build
+      - name: Upload to Hostinger
+        if: steps.ftp.outputs.ready == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ${{ vars.FTP_DIR || '/public_html/' }}
+          exclude: |
+            **/*.map

@@ -5,8 +5,8 @@
 import { type DietId, isDietId } from "../core/diets.js";
 import type { Product } from "../core/openfoodfacts.js";
 
-const DIET_KEY = "vegscan.diet";
-const HISTORY_KEY = "vegscan.history";
+const DIET_KEY = "vegsure.diet";
+const HISTORY_KEY = "vegsure.history";
 const HISTORY_MAX = 30;
 
 export interface HistoryEntry {

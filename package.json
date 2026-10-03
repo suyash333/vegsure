@@ -1,5 +1,5 @@
 {
-  "name": "vegscan",
+  "name": "vegsure-web",
   "version": "0.1.0",
   "private": true,
   "description": "Scan a food barcode, QR code or ingredient list and see which ingredients are not vegetarian or vegan",

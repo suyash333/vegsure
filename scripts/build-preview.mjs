@@ -4,7 +4,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import * as esbuild from "esbuild";
 
-const out = process.argv[2] ?? "dist-preview/vegscan-preview.html";
+const out = process.argv[2] ?? "dist-preview/vegsure-preview.html";
 const result = await esbuild.build({
   entryPoints: ["src/web/app.ts"],
   bundle: true,
@@ -18,13 +18,13 @@ const result = await esbuild.build({
 });
 const js = result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 const css = await readFile("static/styles.css", "utf8");
-const html = `<title>VegScan</title>
+const html = `<title>VegSure</title>
 <style>
 ${css}
 .topbar { top: env(safe-area-inset-top, 0px); padding-top: 10px; }
 </style>
 <header class="topbar">
-  <h1><span class="logo" aria-hidden="true">🌿</span> VegScan</h1>
+  <h1><span class="logo" aria-hidden="true">🌿</span> VegSure</h1>
   <button id="diet-button" class="diet-chip" type="button" aria-label="Change diet">Vegetarian</button>
 </header>
 <main id="app"></main>

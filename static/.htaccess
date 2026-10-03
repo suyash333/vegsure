@@ -1,0 +1,25 @@
+# Apache settings for Hostinger (and other Apache hosts).
+
+# Correct types so phones offer "Install app" and the Android download opens as an app.
+AddType application/manifest+json .webmanifest
+AddType application/vnd.android.package-archive .apk
+
+# Always use HTTPS: browsers only allow the camera on secure pages.
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Let updates reach people straight away.
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest|vegsure\.apk)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "^vegsure\.apk$">
+    Header set Content-Disposition "attachment; filename=VegSure.apk"
+  </FilesMatch>
+</IfModule>
+
+# Source maps are only for debugging.
+<FilesMatch "\.map$">
+  Require all denied
+</FilesMatch>
